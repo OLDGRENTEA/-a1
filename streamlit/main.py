@@ -47,7 +47,7 @@ myradio = st.sidebar.radio(label = "世卫组织冠状病毒 (COVID-19) 仪表�
 
 #数据可视化
 if myradio == "国家":
-    df = covid_data.groupby(by=['Country']).sum().reset_index()
+    df = covid_data.groupby(by=['Country']).max().reset_index()
     select = st.sidebar.selectbox('选择一个国家', df['Country'])
 
     # df1 = covid_data.groupby(by=['WHO_region']).sum().reset_index()
@@ -112,6 +112,7 @@ if myradio == "国家":
     mask2 = mask1[mask1['Date_reported'] <= end_time]
     st.line_chart(mask2[leixing])
 
+
     #显示数据框或表格
     def get_table():
         datatable = df.sort_values(by=['Cumulative_cases'], ascending=False)
@@ -122,8 +123,53 @@ if myradio == "国家":
     st.dataframe(datatable) # will display the dataframe
     st.table(state_total)# will display the table
 
+    import bar_chart_race as bcr
+    from IPython.display import display
+    import pandas as pd
+    import base64
+    import datetime
+    import time
+
+    df2 = pd.read_csv('bar_chart_race.csv', index_col=["Date"])
+
+    ttt =list(set(list(df2.columns)) - set(['Date']))
+
+    my_multiselect = st.multiselect("下面为您动态展示各国家每日累计新冠人数, 您可以选择要展示的国家, 可能会有些慢，请稍等",
+                                    options=ttt,
+                                    default=("China", "France", "Germany", "Netherlands", "Spain", "USA", "UK", "Italy"))
+
+    start_time1 = st.date_input("起始时间", value=(datetime.date(2020, 3, 10)), key = 8)
+    end_time1 = st.date_input("结束时间", value=(datetime.date(2020, 4, 10)), key = 9)
+    print("oooooooooooooooo!")
+    print(start_time1)
+    print(end_time1)
+
+    qtime = datetime.date(2020,1,3)
+    start_time2 = (start_time1 - qtime).days
+    end_time2 = (end_time1 - qtime).days
+
+    if my_multiselect:
+
+        df3 = df2.iloc[start_time2:end_time2]
+
+        chooselist = ttt
+        chooselist = list(set(chooselist)-set(my_multiselect))
+
+        df3.drop(labels=chooselist, axis=1, inplace=True)
+        bcr.bar_chart_race(df3, "covid19_horiz.gif", steps_per_period=4, bar_kwargs={'alpha': .2, 'ec': 'black', 'lw': 3}, period_length=500 * (30/(end_time2 - start_time2)))
+
+        file_ = open("./covid19_horiz.gif", "rb")
+        contents = file_.read()
+        data_url = base64.b64encode(contents).decode("utf-8")
+        file_.close()
+
+        st.markdown(
+            f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+            unsafe_allow_html=True,
+        )
+
 elif myradio == "地区":
-    df = covid_data.groupby(by=['WHO_region']).sum().reset_index()
+    df = covid_data.groupby(by=['WHO_region']).max().reset_index()
     select = st.sidebar.selectbox('选择一个地区', df['WHO_region'])
 
     # df1 = covid_data.groupby(by=['WHO_region']).sum().reset_index()
@@ -187,6 +233,8 @@ elif myradio == "地区":
     mask1 = mask[mask['Date_reported'] >= start_time]
     mask2 = mask1[mask1['Date_reported'] <= end_time]
     st.line_chart(mask2[leixing])
+
+
 
 
     # df1 = df1[start_time:end_time]
