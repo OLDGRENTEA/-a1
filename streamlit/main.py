@@ -134,7 +134,7 @@ if myradio == "国家":
 
     ttt =list(set(list(df2.columns)) - set(['Date']))
 
-    my_multiselect = st.multiselect("下面为您动态展示各国家每日累计新冠人数, 您可以选择要展示的国家, 可能会有些慢，请稍等",
+    my_multiselect = st.multiselect("下面为您动态展示各国家每日累计新冠人数, 您可以选择要展示的国家, 可能会有些慢，请稍等。（选择的时间段最好不要超过六个月）",
                                     options=ttt,
                                     default=("China", "France", "Germany", "Netherlands", "Spain", "USA", "UK", "Italy"))
 
@@ -145,28 +145,37 @@ if myradio == "国家":
     print(end_time1)
 
     qtime = datetime.date(2020,1,3)
+    etime = datetime.date(2022,11,24)
     start_time2 = (start_time1 - qtime).days
     end_time2 = (end_time1 - qtime).days
 
-    if my_multiselect:
+    if my_multiselect and (end_time2 - start_time2)<=190:
+        if start_time2 < 0:
+            st.markdown("动态图生成失败！起始日期至少为2020/1/3")
+        elif end_time2 > (etime - qtime).days:
+            st.markdown("动态图生成失败！结束日期最多为2020/11/24")
+        elif start_time2 >= end_time2:
+            st.markdown("动态图生成失败！结束日期必须晚于开始日期")
+        else:
+            df3 = df2.iloc[start_time2:end_time2]
 
-        df3 = df2.iloc[start_time2:end_time2]
+            chooselist = ttt
+            chooselist = list(set(chooselist)-set(my_multiselect))
 
-        chooselist = ttt
-        chooselist = list(set(chooselist)-set(my_multiselect))
+            df3.drop(labels=chooselist, axis=1, inplace=True)
+            bcr.bar_chart_race(df3, "covid19_horiz.gif", steps_per_period=4, bar_kwargs={'alpha': .2, 'ec': 'black', 'lw': 3}, period_length=500 * (30/(end_time2 - start_time2)))
 
-        df3.drop(labels=chooselist, axis=1, inplace=True)
-        bcr.bar_chart_race(df3, "covid19_horiz.gif", steps_per_period=4, bar_kwargs={'alpha': .2, 'ec': 'black', 'lw': 3}, period_length=500 * (30/(end_time2 - start_time2)))
+            file_ = open("./covid19_horiz.gif", "rb")
+            contents = file_.read()
+            data_url = base64.b64encode(contents).decode("utf-8")
+            file_.close()
 
-        file_ = open("./covid19_horiz.gif", "rb")
-        contents = file_.read()
-        data_url = base64.b64encode(contents).decode("utf-8")
-        file_.close()
-
-        st.markdown(
-            f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-            unsafe_allow_html=True,
-        )
+            st.markdown(
+                f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+                unsafe_allow_html=True,
+            )
+    else:
+        st.markdown("动态图生成失败！请选择至少一个国家 以及 六个月以内的时间")
 
 elif myradio == "地区":
     df = covid_data.groupby(by=['WHO_region']).max().reset_index()
