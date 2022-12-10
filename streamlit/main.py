@@ -149,7 +149,7 @@ if myradio == "国家":
     start_time2 = (start_time1 - qtime).days
     end_time2 = (end_time1 - qtime).days
 
-    if my_multiselect and (end_time2 - start_time2)<=190:
+    if my_multiselect and (end_time2 - start_time2)<=130:
         if start_time2 < 0:
             st.markdown("动态图生成失败！起始日期至少为2020/1/3")
         elif end_time2 > (etime - qtime).days:
@@ -175,7 +175,7 @@ if myradio == "国家":
                 unsafe_allow_html=True,
             )
     else:
-        st.markdown("动态图生成失败！请选择至少一个国家 以及 六个月以内的时间")
+        st.markdown("动态图生成失败！请选择至少一个国家 以及 四个月以内的时间")
 
 elif myradio == "地区":
     df = covid_data.groupby(by=['WHO_region']).max().reset_index()
