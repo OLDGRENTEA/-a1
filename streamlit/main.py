@@ -134,7 +134,7 @@ if myradio == "国家":
 
     ttt =list(set(list(df2.columns)) - set(['Date']))
 
-    my_multiselect = st.multiselect("下面为您动态展示各国家每日累计新冠人数, 您可以选择要展示的国家, 可能会有些慢，请稍等。（选择的时间段最好不要超过六个月）",
+    my_multiselect = st.multiselect("下面为您动态展示各国家每日累计新冠人数, 您可以选择要展示的国家, 可能会有些慢，请稍等。（选择的时间段最好不要超过4个月）",
                                     options=ttt,
                                     default=("China", "France", "Germany", "Netherlands", "Spain", "USA", "UK", "Italy"))
 
