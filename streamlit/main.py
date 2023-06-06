@@ -15,6 +15,10 @@ from textrank4zh import TextRank4Sentence
 
 #加载数据集（数据来源：WHO）
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
+def load_data():
+    data = pd.read_csv('COVID-19-global-data.csv', encoding='gb2312', error_bad_lines=False, sep='\t')
+    return data
+
 
 con = st.container()
 
